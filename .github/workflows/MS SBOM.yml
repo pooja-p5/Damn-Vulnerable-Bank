@@ -1,0 +1,46 @@
+name: Generate MS SBOM
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Download MS SBOM Tool
+        run: |
+          wget https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64 -O sbom-tool
+          chmod +x sbom-tool
+          sudo mv sbom-tool /usr/local/bin/sbom-tool
+      - name: List build outputs
+        run: |
+          find ./app/build/outputs -type f  
+      - name: Generate SBOM
+        run: |
+          mkdir -p ./_sbom
+          sbom-tool generate \
+            -b  . \
+            -bc . \
+            -pn Vulnapp" \
+            -pv "1.0.0" \
+            -ps "android" \
+            -nsb https://github.com/android/nowinandroid \
+            -m ./_sbom
+      - name: Upload SBOM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: ./_sbom
