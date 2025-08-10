@@ -28,7 +28,6 @@ jobs:
     
       - name: Generate SBOM
         run: |
-          mkdir -p ./_sbom
           sbom-tool generate \
             -b  . \
             -bc . \
@@ -36,9 +35,10 @@ jobs:
             -pv "1.0.0" \
             -ps "android" \
             -nsb https://github.com/android/nowinandroid \
-            -m ./_sbom
+            -m .
+            
       - name: Upload SBOM Artifact
         uses: actions/upload-artifact@v4
         with:
           name: sbom
-          path: ./_sbom
+          path: .
