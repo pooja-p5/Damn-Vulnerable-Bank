@@ -25,9 +25,7 @@ jobs:
           wget https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64 -O sbom-tool
           chmod +x sbom-tool
           sudo mv sbom-tool /usr/local/bin/sbom-tool
-      - name: List build outputs
-        run: |
-          find ./app/build/outputs -type f  
+    
       - name: Generate SBOM
         run: |
           mkdir -p ./_sbom
