@@ -31,7 +31,7 @@ jobs:
           sbom-tool generate \
             -b  . \
             -bc . \
-            -pn Vulnapp" \
+            -pn "Vulnapp" \
             -pv "1.0.0" \
             -ps "android" \
             -nsb https://github.com/android/nowinandroid \
