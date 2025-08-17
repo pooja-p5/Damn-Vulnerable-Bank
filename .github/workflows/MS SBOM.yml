@@ -36,9 +36,26 @@ jobs:
             -ps "android" \
             -nsb https://github.com/android/nowinandroid \
             -m .
+
+      - name: generate SBOM in Cyclonedx 
+        run: | 
+          sbom-tool generate \
+            -b . \
+            -bc . \
+            -pn "Vulnapp" \
+            -pv "1.0.0" \
+            -ps "android" \
+            -f cyclonedx \
+            -o sbom-output
+      
             
       - name: Upload SBOM Artifact
         uses: actions/upload-artifact@v4
         with:
           name: sbom
           path: .
+      - name: Upload SBOM Artifact in Cyclonedx
+        uses: actions/upload-artifact@v4
+          with:
+          name: ms-sbom-cyclonedx
+          path: sbom-output
