@@ -54,8 +54,9 @@ jobs:
         with:
           name: sbom
           path: .
+          
       - name: Upload SBOM Artifact in Cyclonedx
         uses: actions/upload-artifact@v4
-          with:
-          name: ms-sbom-cyclonedx
-          path: sbom-output
+        with:
+             name: ms-sbom-cyclonedx
+             path: sbom-output
