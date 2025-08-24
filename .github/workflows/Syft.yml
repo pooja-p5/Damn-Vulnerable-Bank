@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p sbom
           syft dir:. -o spdx-json > sbom/apk.spdx.json
-          Syft dir:. -o cyclonedx-json > sbom/apk-cyclonedx.cyclonedx.json
+          syft dir:. -o cyclonedx-json > sbom/apk-cyclonedx.cyclonedx.json
           
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
