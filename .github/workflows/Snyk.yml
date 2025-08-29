@@ -1,4 +1,4 @@
-name: Generate SBOM with Snyk
+name: Generate SBOM with Snyk (Node.js)
 
 on:
   workflow_dispatch:
@@ -10,56 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repo
-      - name: Checkout repository
+      # 1. Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2. Install Snyk CLI
+      # 2. Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "npm"
+
+      # 3. Install project dependencies
+      - name: Install npm dependencies
+        run: npm ci
+
+      # 4. Install Snyk CLI
       - name: Install Snyk CLI
         run: npm install -g snyk
 
-      # 3. Authenticate Snyk CLI
+      # 5. Authenticate Snyk
       - name: Authenticate Snyk
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      # 4. Detect project type and install dependencies
-      - name: Install dependencies
-        run: |
-          if [ -f "pom.xml" ]; then
-            echo "Java/Maven project detected"
-            sudo apt-get update && sudo apt-get install -y maven openjdk-17-jdk
-            mvn clean install -DskipTests
-          elif [ -f "composer.json" ]; then
-            echo "PHP/Composer project detected"
-            sudo apt-get update && sudo apt-get install -y php-cli composer
-            composer install
-          elif [ -f "requirements.txt" ]; then
-            echo "Python project detected"
-            python3 -m pip install --upgrade pip
-            pip install -r requirements.txt
-          else
-            echo "Unknown project type. Exiting..."
-            exit 1
-          fi
-
+      # 6. Generate SBOM (CycloneDX JSON)
       - name: Generate SBOM
-        run: |
-            if [ -f "pom.xml" ]; then
-              echo "Java/Maven project detected"
-              snyk sbom --file=pom.xml --format=cyclonedx1.4+json > sbom-cyclonedx.json
-            elif [ -f "composer.json" ]; then
-              echo "PHP/Composer project detected"
-              snyk sbom --file=composer.json --format=cyclonedx1.4+json > sbom-cyclonedx.json
-            elif [ -f "requirements.txt" ]; then
-              echo "Python project detected"
-              snyk sbom --file=requirements.txt --format=cyclonedx1.4+json > sbom-cyclonedx.json
-            else
-              echo "No recognized dependency file found. Exiting..."
-              exit 1
-            fi
+        run: snyk sbom --file=package-lock.json --format=cyclonedx1.4+json > sbom-cyclonedx.json
 
-
-      # 6. Upload SBOM artifact
+      # 7. Upload SBOM artifact
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
         with:
