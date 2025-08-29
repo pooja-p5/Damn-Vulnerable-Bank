@@ -14,17 +14,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2. Set up Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: "npm"
-
-      # 3. Install project dependencies
-      - name: Install npm dependencies
-        run: npm ci
-
       # 4. Install Snyk CLI
       - name: Install Snyk CLI
         run: npm install -g snyk
