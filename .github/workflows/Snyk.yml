@@ -1,0 +1,61 @@
+name: Generate SBOM with Snyk
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  snyk-sbom:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Install Snyk CLI
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      # 3. Authenticate Snyk CLI
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      # 4. Detect project type and install dependencies
+      - name: Install dependencies
+        run: |
+          if [ -f "pom.xml" ]; then
+            echo "Java/Maven project detected"
+            sudo apt-get update && sudo apt-get install -y maven openjdk-17-jdk
+            mvn clean install -DskipTests
+          elif [ -f "composer.json" ]; then
+            echo "PHP/Composer project detected"
+            sudo apt-get update && sudo apt-get install -y php-cli composer
+            composer install
+          elif [ -f "requirements.txt" ]; then
+            echo "Python project detected"
+            python3 -m pip install --upgrade pip
+            pip install -r requirements.txt
+          else
+            echo "Unknown project type. Exiting..."
+            exit 1
+          fi
+
+      # 5. Generate SBOM
+      - name: Generate SBOM
+        run: |
+          if [ -f "pom.xml" ]; then
+            snyk sbom --file=pom.xml --format=cyclonedx1.4+json > sbom-cyclonedx.json
+          elif [ -f "composer.json" ]; then
+            snyk sbom --file=composer.json --format=cyclonedx1.4+json > sbom-cyclonedx.json
+          elif [ -f "requirements.txt" ]; then
+            snyk sbom --file=requirements.txt --format=cyclonedx1.4+json > sbom-cyclonedx.json
+          fi
+
+      # 6. Upload SBOM artifact
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-sbom
+          path: sbom-cyclonedx.json
