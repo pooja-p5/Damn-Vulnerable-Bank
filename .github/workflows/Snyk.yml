@@ -42,16 +42,22 @@ jobs:
             exit 1
           fi
 
-      # 5. Generate SBOM
       - name: Generate SBOM
         run: |
-          if [ -f "pom.xml" ]; then
-            snyk sbom --file=pom.xml --format=cyclonedx1.4+json > sbom-cyclonedx.json
-          elif [ -f "composer.json" ]; then
-            snyk sbom --file=composer.json --format=cyclonedx1.4+json > sbom-cyclonedx.json
-          elif [ -f "requirements.txt" ]; then
-            snyk sbom --file=requirements.txt --format=cyclonedx1.4+json > sbom-cyclonedx.json
-          fi
+            if [ -f "pom.xml" ]; then
+              echo "Java/Maven project detected"
+              snyk sbom --file=pom.xml --format=cyclonedx1.4+json > sbom-cyclonedx.json
+            elif [ -f "composer.json" ]; then
+              echo "PHP/Composer project detected"
+              snyk sbom --file=composer.json --format=cyclonedx1.4+json > sbom-cyclonedx.json
+            elif [ -f "requirements.txt" ]; then
+              echo "Python project detected"
+              snyk sbom --file=requirements.txt --format=cyclonedx1.4+json > sbom-cyclonedx.json
+            else
+              echo "No recognized dependency file found. Exiting..."
+              exit 1
+            fi
+
 
       # 6. Upload SBOM artifact
       - name: Upload SBOM
