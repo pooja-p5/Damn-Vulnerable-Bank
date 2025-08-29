@@ -24,7 +24,7 @@ jobs:
 
       # 6. Generate SBOM (CycloneDX JSON)
       - name: Generate SBOM
-        run: snyk sbom --file=package-lock.json --format=cyclonedx1.4+json > sbom-cyclonedx.json
+        run: snyk sbom --file=Damn-Vulnerable-Bank/BackendServer/package-lock.json --format=cyclonedx1.4+json > sbom-cyclonedx.json
 
       # 7. Upload SBOM artifact
       - name: Upload SBOM
